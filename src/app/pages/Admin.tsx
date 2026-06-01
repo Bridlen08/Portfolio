@@ -22,8 +22,9 @@ export default function AdminDashboard({ token, onLogout }: AdminProps) {
   const fetchData = async () => {
     setIsLoading(true);
     try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5003';
       const endpoint = activeTab === "projects" ? "/api/projects" : "/api/contacts";
-      const response = await fetch(`http://localhost:5003${endpoint}`, {
+      const response = await fetch(`${apiUrl}${endpoint}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await response.json();
@@ -39,7 +40,8 @@ export default function AdminDashboard({ token, onLogout }: AdminProps) {
   const handleDeleteContact = async (id: number) => {
     if (!confirm("Are you sure you want to delete this message?")) return;
     try {
-      await fetch(`http://localhost:5003/api/contacts/${id}`, {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5003';
+      await fetch(`${apiUrl}/api/contacts/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -55,7 +57,8 @@ export default function AdminDashboard({ token, onLogout }: AdminProps) {
     const endpoint = editingProject.id ? `/api/projects/${editingProject.id}` : "/api/projects";
 
     try {
-      await fetch(`http://localhost:5003${endpoint}`, {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5003';
+      await fetch(`${apiUrl}${endpoint}`, {
         method,
         headers: {
           "Content-Type": "application/json",
@@ -73,7 +76,8 @@ export default function AdminDashboard({ token, onLogout }: AdminProps) {
   const handleDeleteProject = async (id: number) => {
     if (!confirm("Are you sure you want to delete this project?")) return;
     try {
-      await fetch(`http://localhost:5003/api/projects/${id}`, {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5003';
+      await fetch(`${apiUrl}/api/projects/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });

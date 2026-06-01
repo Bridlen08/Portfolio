@@ -1,5 +1,6 @@
 export const sendContactMessage = async (formData: FormData) => {
-  const response = await fetch('http://localhost:5003/api/contact', {
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5003';
+  const response = await fetch(`${apiUrl}/api/contact`, {
     method: 'POST',
     body: formData,
   });
