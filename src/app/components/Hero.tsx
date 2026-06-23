@@ -1,321 +1,233 @@
 import { motion } from "framer-motion";
-import { ArrowDown, Github, Linkedin, Mail, Download } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Download, Mail, Eye } from "lucide-react";
+import { FaGithub, FaLinkedin } from "react-icons/fa";
 import { MagneticElement } from "./MagneticElement";
-import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { OWNER } from "../data/portfolio";
+
+function useTyping(words: string[], speed = 80, pause = 1500) {
+  const [display, setDisplay] = useState(words[0][0]);
+  const [wi, setWi] = useState(0);
+  const [ci, setCi] = useState(1);
+  const [del, setDel] = useState(false);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => { setTimeout(() => setReady(true), 100); }, []);
+
+  useEffect(() => {
+  const cur = words[wi];
+  let t: ReturnType<typeof setTimeout>;
+
+  if (!del) {
+    if (ci <= cur.length) {
+      t = setTimeout(() => {
+        setDisplay(cur.slice(0, ci));
+        setCi(c => c + 1);
+      }, speed);
+    } else {
+      t = setTimeout(() => setDel(true), pause);
+    }
+  } else {
+    if (ci >= 0) {
+      t = setTimeout(() => {
+        setDisplay(cur.slice(0, ci));
+        setCi(c => c - 1);
+      }, speed / 2);
+    } else {
+      setWi(i => (i + 1) % words.length);
+      setCi(0);
+      setDisplay("");
+      setDel(false);
+    }
+  }
+
+  return () => clearTimeout(t);
+}, [ci, del, wi, words, speed, pause]);
+
+  return { display, ready };
+}
 
 export function Hero() {
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
+  const { display, ready } = useTyping(OWNER.titles);
+  const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        {/* Gradient blobs */}
-        <motion.div
-          className="absolute top-20 left-20 w-72 h-72 bg-purple-300/50 rounded-full mix-blend-multiply filter blur-xl opacity-70"
-          animate={{
-            x: [0, 100, 0],
-            y: [0, -100, 0],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-        <motion.div
-          className="absolute top-40 right-20 w-72 h-72 bg-blue-300/50 rounded-full mix-blend-multiply filter blur-xl opacity-70"
-          animate={{
-            x: [0, -100, 0],
-            y: [0, 100, 0],
-          }}
-          transition={{
-            duration: 18,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-        <motion.div
-          className="absolute -bottom-32 left-1/2 w-72 h-72 bg-pink-300/50 rounded-full mix-blend-multiply filter blur-xl opacity-70"
-          animate={{
-            x: [0, 50, 0],
-            y: [0, -50, 0],
-          }}
-          transition={{
-            duration: 22,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
+    <section id="hero" className="relative z-10 min-h-screen flex flex-col items-center justify-center px-6 pt-20 pb-12">
+      {/* Glass overlay for readability */}
+      <div className="absolute inset-0 bg-black/35 pointer-events-none" />
 
-        {/* Floating shapes */}
-        {[...Array(8)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-3 h-3 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full opacity-40"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              y: [0, -30, 0],
-              x: [0, Math.random() * 20 - 10, 0],
-              scale: [1, 1.2, 1],
-              opacity: [0.3, 0.6, 0.3],
-            }}
-            transition={{
-              duration: 4 + Math.random() * 3,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: Math.random() * 2,
-            }}
-          />
-        ))}
+      <div className="relative z-10 max-w-6xl mx-auto w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
 
-        {/* Geometric shapes */}
-        <motion.div
-          className="absolute top-1/4 left-1/4 w-32 h-32 border-2 border-purple-300/30 rounded-lg"
-          animate={{
-            rotate: [0, 360],
-            scale: [1, 1.1, 1],
-          }}
-          transition={{
-            duration: 25,
-            repeat: Infinity,
-            ease: "linear",
-          }}
-        />
-        <motion.div
-          className="absolute bottom-1/4 right-1/4 w-24 h-24 border-2 border-blue-300/30"
-          animate={{
-            rotate: [0, -360],
-            scale: [1, 1.2, 1],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: "linear",
-          }}
-        />
-      </div>
+          {/* ── LEFT: Text ── */}
+          <div className="flex flex-col items-center lg:items-start gap-5 text-center lg:text-left order-2 lg:order-1">
 
-      {/* Content */}
-      <div className="relative z-10 max-w-6xl mx-auto px-6 text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          <motion.div
-            className="inline-block mb-4 px-4 py-2 bg-background/60 backdrop-blur-md rounded-full border border-border"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2 }}
-          >
-            <span className="text-sm text-muted-foreground">👋 Welcome to my portfolio</span>
-          </motion.div>
-
-          <motion.h1
-            className="text-6xl md:text-8xl mb-6 bg-gradient-to-r from-purple-600 via-blue-600 to-pink-600 bg-clip-text text-transparent"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-          >
-            Creative Developer
-          </motion.h1>
-
-          <motion.p
-            className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-          >
-            Crafting exceptional digital experiences through code, design, and innovation
-          </motion.p>
-
-          {/* Profile Image */}
-          <motion.div
-            className="mb-12"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.7 }}
-          >
+            {/* Badge */}
             <motion.div
-              className="relative w-32 h-32 mx-auto"
-              whileHover={{ scale: 1.05, rotate: [0, -5, 5, 0] }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-violet-500/40 bg-violet-500/10 backdrop-blur-sm"
+              initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
             >
-              <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full blur-xl opacity-50"
-                animate={{
-                  scale: [1, 1.2, 1],
-                  opacity: [0.3, 0.6, 0.3],
-                }}
-                transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              />
-              <ImageWithFallback
-                src="/My_image.jpeg"
-                alt="Profile"
-                className="relative w-full h-full rounded-full object-cover border-4 border-white/20 shadow-2xl"
-                loading="eager"
-                fetchPriority="high"
-              />
-              <motion.div
-                className="absolute inset-0 rounded-full border-2 border-purple-400/50"
-                animate={{
-                  scale: [1, 1.05, 1],
-                  opacity: [0.5, 1, 0.5],
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              />
+              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+              <span className="text-xs font-semibold text-violet-300 tracking-wide">Available for opportunities</span>
             </motion.div>
-          </motion.div>
 
-          <motion.div
-            className="flex flex-wrap gap-6 justify-center mb-12 mt-8"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
-          >
-            {/* View My Work Button */}
-            <MagneticElement strength={0.2}>
-              <motion.button
-                className="relative px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-full overflow-hidden group font-medium"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => scrollToSection('projects')}
-              >
-                <span className="relative z-10">View My Work</span>
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600"
-                  initial={{ x: '-100%' }}
-                  whileHover={{ x: 0 }}
-                  transition={{ duration: 0.3 }}
-                />
-                <motion.div
-                  className="absolute inset-0 bg-white/20"
-                  initial={{ scale: 0 }}
-                  whileHover={{ scale: 1 }}
-                  transition={{ duration: 0.2, delay: 0.1 }}
-                />
-              </motion.button>
-            </MagneticElement>
+            {/* Name */}
+            <motion.h1
+              className="text-5xl md:text-6xl xl:text-7xl font-black tracking-tight leading-tight"
+              initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
+            >
+              <span className="bg-gradient-to-r from-white via-violet-100 to-white bg-clip-text text-transparent">
+                {OWNER.name}
+              </span>
+            </motion.h1>
 
-            {/* Get In Touch Button */}
-            <MagneticElement strength={0.2}>
-              <motion.button
-                className="relative px-8 py-4 bg-background/60 backdrop-blur-md text-foreground rounded-full border border-border overflow-hidden group font-medium"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => scrollToSection('contact')}
-              >
-                <span className="relative z-10">Get In Touch</span>
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-blue-600/10"
-                  initial={{ opacity: 0 }}
-                  whileHover={{ opacity: 1 }}
-                  transition={{ duration: 0.3 }}
+            {/* Typing */}
+            <motion.div
+              className="h-9 flex items-center justify-center lg:justify-start"
+              initial={{ opacity: 0 }} animate={{ opacity: ready ? 1 : 0 }} transition={{ duration: 0.3 }}
+            >
+              <span className="text-xl md:text-2xl font-semibold bg-gradient-to-r from-violet-400 to-pink-400 bg-clip-text text-transparent">
+                {display}
+                <motion.span
+                  className="inline-block w-0.5 h-6 bg-violet-400 ml-0.5 align-middle"
+                  animate={{ opacity: [1, 0] }}
+                  transition={{ duration: 0.6, repeat: Infinity }}
                 />
-                <motion.div
-                  className="absolute inset-0 border border-purple-600/50 rounded-full"
-                  initial={{ scale: 1 }}
-                  whileHover={{ scale: 1.1 }}
-                  transition={{ duration: 0.2 }}
-                />
-              </motion.button>
-            </MagneticElement>
+              </span>
+            </motion.div>
 
-            {/* Download Resume Button - Cleaner Implementation */}
-            <MagneticElement strength={0.2}>
-              <motion.a
-                href="/Bridleen.resume.pdf"
-                download="Bridleen_Resume.pdf"
-                className="relative px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-full overflow-hidden group font-medium flex items-center gap-2"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <span className="relative z-10 flex items-center gap-2 whitespace-nowrap">
-                  <Download size={18} className="flex-shrink-0" />
-                  <span>Download Resume</span>
-                </span>
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-green-600"
-                  initial={{ x: '-100%' }}
-                  whileHover={{ x: 0 }}
-                  transition={{ duration: 0.3 }}
-                />
-                <motion.div
-                  className="absolute inset-0 bg-white/20"
-                  initial={{ scale: 0 }}
-                  whileHover={{ scale: 1 }}
-                  transition={{ duration: 0.2, delay: 0.1 }}
-                />
-              </motion.a>
-            </MagneticElement>
-          </motion.div>
+            {/* Description */}
+            <motion.p
+              className="text-white/65 max-w-xl leading-relaxed text-sm md:text-base"
+              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
+            >
+              {OWNER.description}
+            </motion.p>
 
-          <motion.div
-            className="flex gap-6 justify-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1 }}
-          >
-            {[
-              { Icon: Github, label: "GitHub", href: "https://github.com/Bridlen08" },
-              { Icon: Linkedin, label: "LinkedIn", href: "https://www.linkedin.com/in/bridleen-p-a6ab68304" },
-              { Icon: Mail, label: "Email", href: "mailto:perricpp@gmail.com" },
-            ].map(({ Icon, label, href }, index) => (
-              <MagneticElement key={label} strength={0.3}>
-                <motion.a
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-12 h-12 bg-background/60 backdrop-blur-md rounded-full flex items-center justify-center border border-border hover:bg-background/80 transition-colors overflow-hidden group"
-                  whileHover={{ scale: 1.1, rotate: 5 }}
-                  whileTap={{ scale: 0.9 }}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 1 + index * 0.1 }}
+            {/* Buttons */}
+            <motion.div
+              className="flex flex-wrap gap-3 justify-center lg:justify-start"
+              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.75 }}
+            >
+              <MagneticElement strength={0.2}>
+                <button
+                  onClick={() => scrollTo("projects")}
+                  className="flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-white text-sm bg-gradient-to-r from-violet-600 to-purple-700 hover:opacity-90 transition-opacity shadow-lg shadow-violet-500/30"
                 >
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-br from-purple-600/20 to-blue-600/20"
-                    initial={{ opacity: 0, scale: 0 }}
-                    whileHover={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.2 }}
-                  />
-                  <Icon className="w-5 h-5 text-foreground relative z-10" />
-                </motion.a>
+                  <Eye size={14} /> View Projects
+                </button>
               </MagneticElement>
-            ))}
-          </motion.div>
-        </motion.div>
-      </div>
+              <MagneticElement strength={0.2}>
+                <a
+                  href={OWNER.resume} download="Bridleen_P_Resume.pdf"
+                  className="flex items-center gap-2 px-6 py-3 rounded-full font-semibold border border-white/25 bg-white/5 text-white hover:bg-white/10 transition-colors backdrop-blur-sm text-sm"
+                >
+                  <Download size={14} /> Resume
+                </a>
+              </MagneticElement>
+              <MagneticElement strength={0.2}>
+                <button
+                  onClick={() => scrollTo("contact")}
+                  className="flex items-center gap-2 px-6 py-3 rounded-full font-semibold border border-violet-500/40 bg-violet-500/10 text-violet-300 hover:bg-violet-500/20 transition-colors text-sm"
+                >
+                  <Mail size={14} /> Contact Me
+                </button>
+              </MagneticElement>
+            </motion.div>
 
-      {/* Scroll indicator */}
-      <motion.div
-        className="absolute bottom-10 left-1/2 -translate-x-1/2"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1, y: [0, 10, 0] }}
-        transition={{
-          opacity: { delay: 1.5 },
-          y: { duration: 2, repeat: Infinity, ease: "easeInOut" },
-        }}
-      >
-        <ArrowDown className="w-6 h-6 text-gray-600" />
-      </motion.div>
+            {/* Socials */}
+            <motion.div
+              className="flex gap-3"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9 }}
+            >
+              {[
+                { Icon: FaGithub,   href: OWNER.github,   label: "GitHub" },
+                { Icon: FaLinkedin, href: OWNER.linkedin, label: "LinkedIn" },
+              ].map(({ Icon, href, label }, i) => (
+                <MagneticElement key={label} strength={0.3}>
+                  <motion.a
+                    href={href} target="_blank" rel="noopener noreferrer" aria-label={label}
+                    className="w-10 h-10 rounded-full border border-white/20 bg-white/5 backdrop-blur-sm flex items-center justify-center text-white/70 hover:text-white hover:border-violet-500/50 hover:bg-violet-500/10 transition-all"
+                    initial={{ opacity: 0, scale: 0 }} animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.9 + i * 0.1, type: "spring" }}
+                    whileHover={{ scale: 1.15, y: -2 }}
+                  >
+                    <Icon size={15} />
+                  </motion.a>
+                </MagneticElement>
+              ))}
+            </motion.div>
+          </div>
+
+          {/* ── RIGHT: Photo + BP Logo ── */}
+          <motion.div
+            className="flex justify-center lg:justify-end items-center order-1 lg:order-2"
+            initial={{ opacity: 0, x: 50, scale: 0.9 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.35, type: "spring", stiffness: 120 }}
+          >
+            <div className="relative">
+              {/* Ambient glow */}
+              <motion.div
+                className="absolute inset-[-20px] rounded-full blur-3xl opacity-40 pointer-events-none"
+                style={{ background: "linear-gradient(135deg, #7c3aed, #ec4899, #06b6d4)" }}
+                animate={{ opacity: [0.3, 0.55, 0.3], scale: [1, 1.06, 1] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              />
+
+              {/* Rotating gradient ring */}
+              <motion.div
+                className="absolute inset-[-3px] rounded-full border-2 border-transparent pointer-events-none"
+                style={{
+                  background: "linear-gradient(#0d0d1a,#0d0d1a) padding-box, conic-gradient(from 0deg,#7c3aed,#ec4899,#06b6d4,#7c3aed) border-box",
+                }}
+                animate={{ rotate: 360 }}
+                transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+              />
+
+              {/* Photo */}
+              <motion.div
+                className="relative overflow-hidden rounded-full shadow-2xl"
+                whileHover={{ scale: 1.03 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              >
+                <img
+                  src="/My_image.jpeg"
+                  alt={OWNER.name}
+                  className="w-[280px] h-[280px] md:w-[340px] md:h-[340px] object-cover rounded-full"
+                  style={{ objectPosition: "center" }}
+                  loading="eager"
+                />
+              </motion.div>
+
+              {/* Open to work badge — bottom */}
+              <motion.div
+                className="absolute -bottom-3 left-1/2 -translate-x-1/2 z-20 px-4 py-1.5 rounded-full border border-white/15 bg-black/70 backdrop-blur-md shadow-xl flex items-center gap-1.5 whitespace-nowrap"
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 1.25, type: "spring", stiffness: 300 }}
+              >
+                {/* <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" /> */}
+                <span className="text-xs font-bold text-green-400">Open to Work</span>
+              </motion.div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Scroll indicator */}
+        <motion.button
+          onClick={() => scrollTo("about")}
+          className="mt-12 mx-auto flex flex-col items-center gap-1 text-white/30 hover:text-white/60 transition-colors"
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.5 }}
+        >
+          <span className="text-[10px] tracking-widest uppercase">Scroll</span>
+          <motion.div
+            className="w-0.5 h-8 bg-gradient-to-b from-violet-500 to-transparent rounded-full"
+            animate={{ scaleY: [0.5, 1, 0.5], opacity: [0.4, 1, 0.4] }}
+            transition={{ duration: 1.8, repeat: Infinity }}
+          />
+        </motion.button>
+      </div>
     </section>
   );
 }

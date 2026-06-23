@@ -1,141 +1,135 @@
-import { motion } from "framer-motion";
+import { motion, useScroll, useMotionValueEvent } from "framer-motion";
 import { useState } from "react";
+import { Sun, Moon, Menu, X } from "lucide-react";
+import { BPLogo } from "./BPLogo";
+import { NAV_ITEMS } from "../data/portfolio";
 import { MagneticElement } from "./MagneticElement";
+import { useTheme } from "../ui/ThemeProvider";
 
-interface NavbarProps {
-  onThemeToggle: () => void;
-  isDark: boolean;
-}
+export function Navbar() {
+  const { theme, toggleTheme } = useTheme();
+  const isDark = theme === "dark";
+  const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [active, setActive] = useState("hero");
+  const { scrollY } = useScroll();
 
-export function Navbar({ onThemeToggle, isDark }: NavbarProps) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+  useMotionValueEvent(scrollY, "change", (y) => {
+    setScrolled(y > 20);
+    for (const item of [...NAV_ITEMS].reverse()) {
+      const el = document.getElementById(item.id);
+      if (el && el.getBoundingClientRect().top <= 120) { setActive(item.id); break; }
     }
-    setIsOpen(false);
+  });
+
+  const scrollTo = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    setOpen(false);
   };
 
-  const navItems = [
-    { label: 'Home', id: 'hero' },
-    { label: 'About', id: 'about' },
-    { label: 'Resume', id: 'resume' },
-    { label: 'Projects', id: 'projects' },
-    { label: 'Skills', id: 'skills' },
-    { label: 'Contact', id: 'contact' },
-  ];
+  const navBg = scrolled
+    ? isDark
+      ? "bg-black/65 backdrop-blur-xl border-b border-white/10 shadow-lg"
+      : "bg-white/80 backdrop-blur-xl border-b border-violet-200/50 shadow-lg"
+    : "bg-transparent";
 
   return (
     <motion.nav
-      className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border"
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.5 }}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${navBg}`}
+      initial={{ y: -80 }} animate={{ y: 0 }} transition={{ duration: 0.6 }}
     >
-      <div className="max-w-7xl mx-auto px-6 py-4">
-        <div className="flex items-center justify-between">
-          {/* Logo */}
-          <motion.div
-            className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent cursor-pointer"
-            whileHover={{ scale: 1.05 }}
-            onClick={() => scrollToSection('hero')}
-          >
-            Portfolio
-          </motion.div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+        <MagneticElement strength={0.15}>
+          <button onClick={() => scrollTo("hero")} className="flex items-center gap-2.5" aria-label="Home">
+            <BPLogo size="sm" animate={false} />
+            <span className={`hidden sm:block font-bold tracking-tight text-sm ${isDark ? "text-white/90" : "text-violet-900"}`}>
+              Bridleen P
+            </span>
+          </button>
+        </MagneticElement>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            {navItems.map((item) => (
-              <MagneticElement key={item.id} strength={0.1}>
-                <motion.button
-                  className="text-foreground hover:text-purple-600 transition-colors relative"
-                  onClick={() => scrollToSection(item.id)}
-                  whileHover={{ y: -2 }}
-                >
-                  {item.label}
-                  <motion.div
-                    className="absolute -bottom-1 left-0 right-0 h-0.5 bg-purple-600"
-                    initial={{ scaleX: 0 }}
-                    whileHover={{ scaleX: 1 }}
-                    transition={{ duration: 0.2 }}
-                  />
-                </motion.button>
-              </MagneticElement>
-            ))}
-
-            {/* Theme Toggle */}
-            <MagneticElement strength={0.2}>
-              <motion.button
-                onClick={onThemeToggle}
-                className="w-10 h-10 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center transition-colors"
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-              >
-                {isDark ? '☀️' : '🌙'}
-              </motion.button>
-            </MagneticElement>
-          </div>
-
-          {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center space-x-4">
-            <MagneticElement strength={0.2}>
-              <motion.button
-                onClick={onThemeToggle}
-                className="w-8 h-8 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center transition-colors"
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-              >
-                {isDark ? '☀️' : '🌙'}
-              </motion.button>
-            </MagneticElement>
-
-            <motion.button
-              className="w-8 h-8 flex flex-col justify-center items-center space-y-1"
-              onClick={() => setIsOpen(!isOpen)}
-              whileTap={{ scale: 0.9 }}
+        {/* Desktop */}
+        <div className="hidden lg:flex items-center gap-0.5">
+          {NAV_ITEMS.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => scrollTo(item.id)}
+              className={`relative px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors duration-200 ${
+                active === item.id
+                  ? "text-violet-500"
+                  : isDark ? "text-white/55 hover:text-white" : "text-violet-900/60 hover:text-violet-900"
+              }`}
             >
-              <motion.div
-                className="w-6 h-0.5 bg-foreground"
-                animate={isOpen ? { rotate: 45, y: 8 } : { rotate: 0, y: 0 }}
-                transition={{ duration: 0.2 }}
-              />
-              <motion.div
-                className="w-6 h-0.5 bg-foreground"
-                animate={isOpen ? { opacity: 0 } : { opacity: 1 }}
-                transition={{ duration: 0.2 }}
-              />
-              <motion.div
-                className="w-6 h-0.5 bg-foreground"
-                animate={isOpen ? { rotate: -45, y: -8 } : { rotate: 0, y: 0 }}
-                transition={{ duration: 0.2 }}
-              />
-            </motion.button>
-          </div>
+              {item.label}
+              {active === item.id && (
+                <motion.div
+                  className="absolute bottom-0 left-2 right-2 h-0.5 rounded-full bg-violet-500"
+                  layoutId="nav-underline"
+                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                />
+              )}
+            </button>
+          ))}
+          <button
+            onClick={toggleTheme}
+            className={`ml-2 w-8 h-8 rounded-full border flex items-center justify-center transition-colors ${
+              isDark
+                ? "border-white/20 bg-white/5 text-white/70 hover:text-white"
+                : "border-violet-300 bg-violet-50 text-violet-700 hover:bg-violet-100"
+            }`}
+            aria-label="Toggle theme"
+          >
+            {isDark ? <Sun size={14} /> : <Moon size={14} />}
+          </button>
         </div>
 
-        {/* Mobile Navigation */}
-        <motion.div
-          className="md:hidden overflow-hidden"
-          initial={false}
-          animate={{ height: isOpen ? 'auto' : 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <div className="py-4 space-y-4">
-            {navItems.map((item) => (
-              <motion.button
-                key={item.id}
-                className="block w-full text-left text-foreground hover:text-purple-600 transition-colors py-2"
-                onClick={() => scrollToSection(item.id)}
-                whileHover={{ x: 10 }}
-              >
-                {item.label}
-              </motion.button>
-            ))}
-          </div>
-        </motion.div>
+        {/* Mobile */}
+        <div className="lg:hidden flex items-center gap-2">
+          <button
+            onClick={toggleTheme}
+            className={`w-8 h-8 rounded-full border flex items-center justify-center ${
+              isDark ? "border-white/20 bg-white/5 text-white/70" : "border-violet-300 bg-violet-50 text-violet-700"
+            }`}
+            aria-label="Toggle theme"
+          >
+            {isDark ? <Sun size={14} /> : <Moon size={14} />}
+          </button>
+          <button
+            onClick={() => setOpen(!open)}
+            className={`w-8 h-8 rounded-full border flex items-center justify-center ${
+              isDark ? "border-white/20 bg-white/5 text-white" : "border-violet-300 bg-violet-50 text-violet-900"
+            }`}
+            aria-label="Menu"
+          >
+            {open ? <X size={15} /> : <Menu size={15} />}
+          </button>
+        </div>
       </div>
+
+      <motion.div
+        className={`lg:hidden border-t overflow-hidden ${
+          isDark ? "bg-black/85 backdrop-blur-xl border-white/10" : "bg-white/90 backdrop-blur-xl border-violet-200/50"
+        }`}
+        initial={false}
+        animate={{ height: open ? "auto" : 0, opacity: open ? 1 : 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <div className="px-4 py-3 grid grid-cols-3 gap-1">
+          {NAV_ITEMS.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => scrollTo(item.id)}
+              className={`py-2 px-2 rounded-lg text-xs font-semibold text-center transition-colors ${
+                active === item.id
+                  ? "bg-violet-500/20 text-violet-500"
+                  : isDark ? "text-white/60 hover:text-white hover:bg-white/5" : "text-violet-900/60 hover:text-violet-900 hover:bg-violet-50"
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      </motion.div>
     </motion.nav>
   );
 }

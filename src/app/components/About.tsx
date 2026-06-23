@@ -1,175 +1,120 @@
 import { motion } from "framer-motion";
-import { ImageWithFallback } from "./figma/ImageWithFallback";
-import { Code2, Palette, Rocket, Users } from "lucide-react";
+import { GraduationCap, Code2, Smartphone, Cloud } from "lucide-react";
+import { SectionWrapper, SectionHeading } from "./SectionWrapper";
+import { OWNER } from "../data/portfolio";
 
-const features = [
-  {
-    icon: Code2,
-    title: "Clean Code",
-    description: "Writing maintainable, scalable, and efficient code that stands the test of time.",
-    color: "from-purple-500 to-purple-600",
-  },
-  {
-    icon: Palette,
-    title: "Creative Design",
-    description: "Blending aesthetics with functionality to create stunning user experiences.",
-    color: "from-blue-500 to-blue-600",
-  },
-  {
-    icon: Rocket,
-    title: "Fast Performance",
-    description: "Optimizing every pixel and byte for lightning-fast load times.",
-    color: "from-pink-500 to-pink-600",
-  },
-  {
-    icon: Users,
-    title: "User Focused",
-    description: "Putting users first in every decision, from concept to deployment.",
-    color: "from-indigo-500 to-indigo-600",
-  },
+const highlights = [
+  { icon: Code2,       label: "Full Stack", desc: "MERN & Django",  color: "from-violet-500 to-purple-600" },
+  { icon: Smartphone,  label: "Mobile",     desc: "Flutter & Dart", color: "from-blue-500 to-cyan-600"    },
+  { icon: Cloud,       label: "Cloud",      desc: "AWS Learning",   color: "from-amber-500 to-orange-600" },
+  { icon: GraduationCap, label: "Student",  desc: "B.E. ECE",       color: "from-green-500 to-emerald-600"},
 ];
+
+const containerVariants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.12 } },
+};
+const fadeUp = {
+  hidden: { opacity: 0, y: 30 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" as const } },
+};
 
 export function About() {
   return (
-    <section className="relative py-24 px-6 overflow-hidden">
-      {/* Content container with proper z-index to stay above motion background */}
-      <div className="max-w-7xl mx-auto relative z-10">
-        <motion.div
-          className="text-center mb-16"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
-          <h2 className="text-5xl md:text-6xl mb-4 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent font-bold">
-            About Me
-          </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            I'm a passionate developer who loves turning ideas into reality through elegant code and thoughtful design.
-          </p>
-        </motion.div>
-        {/* Profile Image Section */}
-        <motion.div
-          className="mb-16"
-          initial={{ opacity: 0, scale: 0.8 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-        >
-          <div className="flex flex-col md:flex-row items-center gap-8 max-w-4xl mx-auto">
-            <motion.div
-              className="relative"
-              whileHover={{ scale: 1.05, rotate: [0, -5, 5, 0] }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            >
-              <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full blur-2xl opacity-30"
-                animate={{
-                  scale: [1, 1.2, 1],
-                  opacity: [0.2, 0.4, 0.2],
-                }}
-                transition={{
-                  duration: 4,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              />
-              <ImageWithFallback
-                src="/My_image.jpeg"
-                alt="Bridleen P"
-                className="relative w-48 h-48 rounded-full object-cover border-4 border-white/20 shadow-2xl"
-                loading="eager"
-              />
-              <motion.div
-                className="absolute inset-0 rounded-full border-2 border-purple-400/50"
-                animate={{
-                  scale: [1, 1.05, 1],
-                  opacity: [0.5, 1, 0.5],
-                }}
-                transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              />
-            </motion.div>
-            <div className="text-center md:text-left">
-              <h3 className="text-3xl font-bold text-foreground mb-4">Bridleen P</h3>
-              <p className="text-lg text-muted-foreground mb-6 max-w-md">
-                Full Stack Developer passionate about creating innovative digital solutions.
-                I specialize in modern web technologies and love bringing creative ideas to life through code.
-              </p>
-              <div className="flex flex-wrap gap-3 justify-center md:justify-start">
-                {["Problem Solver", "Team Player", "Quick Learner", "Creative Thinker"].map(
-                  (trait) => (
-                    <span
-                      key={trait}
-                      className="px-4 py-2 bg-muted text-foreground rounded-full text-sm border border-border"
-                    >
-                      {trait}
-                    </span>
-                  )
-                )}
-              </div>
-            </div>
-          </div>
-        </motion.div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {features.map((feature, index) => (
-            <motion.div
-              key={feature.title}
-              className="relative group"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-            >
-              <div className="relative overflow-hidden rounded-3xl bg-card p-8 h-full border border-border hover:border-border/80 transition-all shadow-lg hover:shadow-xl">
-                <div className="relative z-10">
-                  <div
-                    className={`inline-flex p-3 rounded-2xl bg-gradient-to-br ${feature.color} mb-4`}
-                  >
-                    <feature.icon className="w-6 h-6 text-white" />
-                  </div>
-                  <h3 className="text-2xl mb-3 text-foreground">{feature.title}</h3>
-                  <p className="text-muted-foreground">{feature.description}</p>
-                </div>
+    <SectionWrapper id="about">
+      <div className="max-w-6xl mx-auto">
+        <SectionHeading label="Who I Am" title="About Me" />
 
-                {/* Hover effect */}
-                <motion.div
-                  className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-5 transition-opacity`}
+        <motion.div
+          className="grid grid-cols-1 lg:grid-cols-2 gap-14 items-center mb-16"
+          initial="hidden" whileInView="show" viewport={{ once: true }} variants={containerVariants}
+        >
+          {/* Photo */}
+          <motion.div variants={fadeUp} className="flex justify-center">
+            <div className="relative">
+              {/* Glow */}
+              <motion.div
+                className="absolute inset-[-16px] rounded-full blur-3xl opacity-35 pointer-events-none"
+                style={{ background: "linear-gradient(135deg,#7c3aed,#ec4899)" }}
+                animate={{ scale: [1, 1.08, 1], opacity: [0.25, 0.45, 0.25] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              />
+              {/* Rotating border */}
+              <motion.div
+                className="absolute inset-[-3px] rounded-full border-2 border-transparent pointer-events-none"
+                style={{ background: "linear-gradient(#0d0d1a,#0d0d1a) padding-box, conic-gradient(from 0deg,#7c3aed,#ec4899,#06b6d4,#7c3aed) border-box" }}
+                animate={{ rotate: 360 }}
+                transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+              />
+              {/* Image */}
+              <motion.div
+                className="relative overflow-hidden rounded-full shadow-2xl"
+                whileHover={{ scale: 1.03 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
+                <img
+                  src="/My_image2.jpeg"
+                  alt={OWNER.name}
+                  className="w-[240px] h-[240px] object-cover rounded-full"
+                  style={{ objectPosition: "center top" }}
+                  loading="eager"
                 />
+              </motion.div>
+              
+            </div>
+          </motion.div>
+
+          {/* Bio */}
+          <motion.div variants={fadeUp} className="space-y-5">
+            <h3 className="text-2xl font-bold text-white">{OWNER.name}</h3>
+            <p className="text-sm font-semibold text-violet-400">{OWNER.titles[0]} · {OWNER.titles[1]}</p>
+
+            {OWNER.about.map((para, i) => (
+              <p key={i} className="text-white/65 leading-relaxed text-sm">{para}</p>
+            ))}
+
+            {/* Education */}
+            <div className="glass-card rounded-2xl p-4">
+              <div className="flex items-center gap-2 mb-1.5">
+                <GraduationCap size={15} className="text-violet-400" />
+                <span className="text-xs font-bold text-white">Education</span>
+              </div>
+              <p className="text-sm font-semibold text-white">B.E. Electronics and Communication Engineering</p>
+              <p className="text-xs text-violet-400 font-medium mt-0.5">Sri Eshwar College of Engineering</p>
+            </div>
+
+            {/* Traits */}
+            <div className="flex flex-wrap gap-2">
+              {OWNER.about.length > 0 && ["Problem Solver", "Quick Learner", "Team Player", "Creative Thinker"].map(t => (
+                <span key={t} className="px-3 py-1.5 text-xs font-semibold rounded-full border border-violet-500/30 bg-violet-500/10 text-violet-300">{t}</span>
+              ))}
+            </div>
+          </motion.div>
+        </motion.div>
+
+        {/* Highlight cards */}
+        <motion.div
+          className="grid grid-cols-2 md:grid-cols-4 gap-4"
+          initial="hidden" whileInView="show" viewport={{ once: true }} variants={containerVariants}
+        >
+          {highlights.map(({ icon: Icon, label, desc, color }) => (
+            <motion.div
+              key={label}
+              variants={fadeUp}
+              className="glass-card p-5 rounded-2xl flex flex-col items-center text-center gap-3 group"
+              whileHover={{ y: -4, scale: 1.03 }}
+            >
+              <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center shadow-lg`}>
+                <Icon size={18} className="text-white" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-white">{label}</p>
+                <p className="text-xs text-white/50 mt-0.5">{desc}</p>
               </div>
             </motion.div>
           ))}
-        </div>
-
-        <motion.div
-          className="mt-16 text-center"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-        >
-          <div className="max-w-4xl mx-auto bg-card/80 backdrop-blur-md rounded-3xl p-12 border border-border">
-            <p className="text-lg text-muted-foreground mb-6">
-              I'm a passionate developer and ECE student at Sri Eshwar College of Engineering, focused on building modern, responsive, and user-friendly web applications. I specialize in React, Node.js, and creative UI development — turning ideas into polished digital experiences.
-            </p>
-            <div className="flex flex-wrap gap-3 justify-center">
-              {["React", "TypeScript", "Node.js", "Tailwind CSS", "Next.js", "GraphQL"].map(
-                (tech) => (
-                  <span
-                    key={tech}
-                    className="px-4 py-2 bg-muted text-foreground rounded-full text-sm border border-border hover:bg-muted/80 transition-colors"
-                  >
-                    {tech}
-                  </span>
-                )
-              )}
-            </div>
-          </div>
         </motion.div>
       </div>
-    </section>
+    </SectionWrapper>
   );
 }

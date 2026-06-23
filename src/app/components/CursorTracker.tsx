@@ -2,83 +2,83 @@ import { motion, useMotionValue, useSpring } from "framer-motion";
 import { useEffect, useState } from "react";
 
 export function CursorTracker() {
-  const cursorX = useMotionValue(-100);
-  const cursorY = useMotionValue(-100);
-  const [isHovering, setIsHovering] = useState(false);
+  const rawX = useMotionValue(-200);
+  const rawY = useMotionValue(-200);
+  const [hovering, setHovering] = useState(false);
+  const [clicking, setClicking] = useState(false);
 
-  const springConfig = { damping: 25, stiffness: 500 };
-  const cursorXSpring = useSpring(cursorX, springConfig);
-  const cursorYSpring = useSpring(cursorY, springConfig);
+  // Trailing dot — more lag
+  const trailX = useSpring(rawX, { stiffness: 80, damping: 20 });
+  const trailY = useSpring(rawY, { stiffness: 80, damping: 20 });
+
+  // Main dot — snappy
+  const dotX = useSpring(rawX, { stiffness: 600, damping: 30 });
+  const dotY = useSpring(rawY, { stiffness: 600, damping: 30 });
 
   useEffect(() => {
-    const moveCursor = (e: MouseEvent) => {
-      cursorX.set(e.clientX);
-      cursorY.set(e.clientY);
+    const onMove = (e: MouseEvent) => {
+      rawX.set(e.clientX);
+      rawY.set(e.clientY);
     };
-
-    const handleMouseOver = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (
-        target.tagName === "BUTTON" ||
-        target.tagName === "A" ||
-        target.closest("button") ||
-        target.closest("a")
-      ) {
-        setIsHovering(true);
-      } else {
-        setIsHovering(false);
-      }
+    const onOver = (e: MouseEvent) => {
+      const t = e.target as HTMLElement;
+      setHovering(
+        !!(t.tagName === "BUTTON" || t.tagName === "A" || t.closest("button") || t.closest("a"))
+      );
     };
+    const onDown = () => setClicking(true);
+    const onUp = () => setClicking(false);
 
-    window.addEventListener("mousemove", moveCursor);
-    window.addEventListener("mouseover", handleMouseOver);
+    window.addEventListener("mousemove", onMove, { passive: true });
+    window.addEventListener("mouseover", onOver, { passive: true });
+    window.addEventListener("mousedown", onDown);
+    window.addEventListener("mouseup", onUp);
 
     return () => {
-      window.removeEventListener("mousemove", moveCursor);
-      window.removeEventListener("mouseover", handleMouseOver);
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseover", onOver);
+      window.removeEventListener("mousedown", onDown);
+      window.removeEventListener("mouseup", onUp);
     };
-  }, [cursorX, cursorY]);
+  }, [rawX, rawY]);
 
   return (
     <>
-      {/* Minimalist cursor - small dot with subtle glow */}
+      {/* Trailing ring */}
       <motion.div
-        className="fixed top-0 left-0 pointer-events-none z-50"
+        className="fixed top-0 left-0 pointer-events-none z-[9997] rounded-full border border-violet-500/50"
         style={{
-          x: cursorXSpring,
-          y: cursorYSpring,
+          x: trailX,
+          y: trailY,
           translateX: "-50%",
           translateY: "-50%",
+          width: hovering ? 44 : 32,
+          height: hovering ? 44 : 32,
+          borderColor: hovering ? "rgba(139,92,246,0.7)" : "rgba(139,92,246,0.4)",
+          transition: "width 0.2s, height 0.2s, border-color 0.2s",
         }}
-      >
-        {/* Pulsing outer ring on hover */}
-        {isHovering && (
-          <motion.div
-            className="absolute top-1/2 left-1/2 w-6 h-6 border border-purple-400/40 rounded-full"
-            style={{
-              translateX: "-50%",
-              translateY: "-50%",
-            }}
-            animate={{
-              scale: [1, 1.2, 1],
-              opacity: [0.4, 0.1, 0.4],
-            }}
-            transition={{
-              duration: 1.5,
-              repeat: Infinity,
-            }}
-          />
-        )}
+        animate={{ scale: clicking ? 0.8 : 1 }}
+        transition={{ duration: 0.15 }}
+      />
 
-        {/* Main cursor dot */}
-        <motion.div
-          className="w-2 h-2 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full shadow-lg shadow-purple-500/50"
-          animate={{
-            scale: isHovering ? 1.3 : 1,
-          }}
-          transition={{ duration: 0.2 }}
-        />
-      </motion.div>
+      {/* Main dot */}
+      <motion.div
+        className="fixed top-0 left-0 pointer-events-none z-[9998] rounded-full"
+        style={{
+          x: dotX,
+          y: dotY,
+          translateX: "-50%",
+          translateY: "-50%",
+          background: hovering
+            ? "linear-gradient(135deg,#7c3aed,#ec4899)"
+            : "linear-gradient(135deg,#a78bfa,#c084fc)",
+          width: hovering ? 8 : 6,
+          height: hovering ? 8 : 6,
+          transition: "width 0.2s, height 0.2s, background 0.2s",
+        }}
+        animate={{ scale: clicking ? 0.6 : 1 }}
+        transition={{ duration: 0.1 }}
+      />
     </>
   );
 }

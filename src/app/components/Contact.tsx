@@ -1,337 +1,120 @@
 import { motion } from "framer-motion";
-import { Mail, MapPin, Phone, Send } from "lucide-react";
+import { Mail, MapPin, Send } from "lucide-react";
+import { FaGithub, FaLinkedin } from "react-icons/fa";
 import { useState } from "react";
-import { sendContactMessage } from "../services/api/contactService";
-
-interface FormData {
-  name: string;
-  email: string;
-  message: string;
-  attachment: File | null;
-}
-
-interface FormErrors {
-  name?: string;
-  email?: string;
-  message?: string;
-  attachment?: string;
-}
+import { SectionWrapper, SectionHeading } from "./SectionWrapper";
+import { OWNER } from "../data/portfolio";
 
 export function Contact() {
-  const [formData, setFormData] = useState<FormData>({ name: "", email: "", message: "", attachment: null });
-  const [errors, setErrors]     = useState<FormErrors>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
-  const [errorMsg, setErrorMsg] = useState("");
+  const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
 
-  // ── Validation ──────────────────────────────────────────────────────────────
-  const validate = (): boolean => {
-    const next: FormErrors = {};
-
-    if (!formData.name.trim()) {
-      next.name = "Name is required";
-    }
-
-    if (!formData.email.trim()) {
-      next.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      next.email = "Please enter a valid email address";
-    }
-
-    if (!formData.message.trim()) {
-      next.message = "Message is required";
-    } else if (formData.message.trim().length < 10) {
-      next.message = "Message must be at least 10 characters";
-    }
-
-    if (formData.attachment) {
-      if (formData.attachment.size > 5 * 1024 * 1024) {
-        next.attachment = "File must be smaller than 5MB";
-      }
-      
-      const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/png', 'image/jpeg'];
-      if (!allowedTypes.includes(formData.attachment.type)) {
-        next.attachment = "Invalid file type. Only PDF, DOCX, PNG, JPG allowed.";
-      }
-    }
-
-    setErrors(next);
-    return Object.keys(next).length === 0;
-  };
-
-  // ── Submit ───────────────────────────────────────────────────────────────────
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validate()) return;
-
-    setIsSubmitting(true);
-    setSubmitStatus("idle");
-    setErrorMsg("");
-
-    try {
-      const submitData = new window.FormData();
-      submitData.append("name", formData.name);
-      submitData.append("email", formData.email);
-      submitData.append("message", formData.message);
-      if (formData.attachment) {
-        submitData.append("attachment", formData.attachment);
-      }
-
-      await sendContactMessage(submitData);
-
-      setSubmitStatus("success");
-      setFormData({ name: "", email: "", message: "", attachment: null });
-      setTimeout(() => setSubmitStatus("idle"), 6000);
-    } catch (err: any) {
-      setSubmitStatus("error");
-      setErrorMsg(err.message || "Failed to send message. Please try again or contact me directly.");
-    } finally {
-      setIsSubmitting(false);
-    }
+    if (!form.name || !form.email || !form.message) return;
+    setSending(true);
+    const body = encodeURIComponent(`Name: ${form.name}\nEmail: ${form.email}\n\n${form.message}`);
+    window.location.href = `mailto:${OWNER.email}?subject=Portfolio Contact&body=${body}`;
+    setTimeout(() => { setSending(false); setSent(true); setForm({ name: "", email: "", message: "" }); }, 800);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value, type } = e.target;
-    
-    if (type === 'file') {
-        const fileInput = e.target as HTMLInputElement;
-        setFormData(prev => ({ ...prev, attachment: fileInput.files ? fileInput.files[0] : null }));
-    } else {
-        setFormData(prev => ({ ...prev, [name]: value }));
-    }
-    
-    // Clear field error on change
-    if (errors[name as keyof FormErrors]) {
-      setErrors(prev => ({ ...prev, [name]: undefined }));
-    }
-  };
-
-  // ── Shared input classes (dark mode aware) ───────────────────────────────────
-  const inputBase =
-    "w-full px-4 py-3 rounded-2xl border bg-white dark:bg-gray-800 " +
-    "text-gray-900 dark:text-white " +
-    "placeholder-gray-400 dark:placeholder-gray-500 " +
-    "focus:outline-none focus:ring-2 transition-all duration-200";
-
-  const inputClasses = (field: keyof FormErrors) =>
-    `${inputBase} ${
-      errors[field]
-        ? "border-red-500 focus:ring-red-400"
-        : "border-gray-300 dark:border-gray-600 focus:ring-purple-500"
-    }`;
+  const inputCls = "w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/30 focus:outline-none focus:border-violet-500/50 focus:bg-white/8 transition-all text-sm";
 
   return (
-    <section className="relative py-24 px-6 overflow-hidden bg-background dark:bg-background">
-      <div className="max-w-7xl mx-auto relative z-10">
+    <SectionWrapper id="contact">
+      <div className="max-w-5xl mx-auto">
+        <SectionHeading label="Get In Touch" title="Contact Me" />
 
-        {/* ── Heading ─────────────────────────────────────────────────────── */}
-        <motion.div
-          className="text-center mb-16"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
-          <h2 className="text-5xl md:text-6xl mb-4 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent font-bold">
-            Get In Touch
-          </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Have a project in mind or want to collaborate? I'd love to hear from you!
-          </p>
-        </motion.div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-
-          {/* ── Contact Info ──────────────────────────────────────────────── */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 items-start">
+          {/* Info */}
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
+            className="lg:col-span-2 space-y-5"
+            initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }} transition={{ duration: 0.55 }}
           >
-            <h3 className="text-3xl mb-8 text-foreground font-semibold">
-              Let's talk about your project
-            </h3>
-            <p className="text-muted-foreground mb-8">
-              I'm always open to discussing new projects, creative ideas, or opportunities to be part of your vision.
+            <p className="text-white/65 text-sm leading-relaxed">
+              I'm always open to discussing new opportunities, projects, or collaborations. Feel free to reach out!
             </p>
 
-            <div className="space-y-6">
-              {[
-                { icon: Mail,    label: "Email",    value: "perricpp@gmail.com",    color: "from-purple-500 to-purple-600" },
-                { icon: Phone,   label: "Phone",    value: "+91 9080812306",         color: "from-blue-500 to-blue-600"   },
-                { icon: MapPin,  label: "Location", value: "Pudukkottai, Tamil Nadu", color: "from-pink-500 to-pink-600"  },
-              ].map((item, index) => (
-                <motion.div
-                  key={item.label}
-                  className="flex items-start gap-4"
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                >
-                  <div className={`flex-shrink-0 w-12 h-12 bg-gradient-to-br ${item.color} rounded-2xl flex items-center justify-center shadow-lg`}>
-                    <item.icon className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">{item.label}</p>
-                    <p className="text-foreground font-medium">{item.value}</p>
-                  </div>
-                </motion.div>
-              ))}
+            {[
+              { icon: Mail,   label: "Email",    value: OWNER.email,    href: `mailto:${OWNER.email}`, color: "from-violet-500 to-purple-600" },
+              { icon: MapPin, label: "Location", value: OWNER.location, href: undefined,               color: "from-pink-500 to-rose-600" },
+            ].map(({ icon: Icon, label, value, href, color }) => (
+              <div key={label} className="glass-card rounded-2xl p-4 flex items-center gap-4">
+                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center flex-shrink-0`}>
+                  <Icon size={16} className="text-white" />
+                </div>
+                <div>
+                  <p className="text-[10px] text-white/40 uppercase tracking-wider">{label}</p>
+                  {href
+                    ? <a href={href} className="text-sm text-white font-medium hover:text-violet-400 transition-colors">{value}</a>
+                    : <p className="text-sm text-white font-medium">{value}</p>
+                  }
+                </div>
+              </div>
+            ))}
+
+            <div>
+              <p className="text-[10px] font-bold tracking-widest uppercase text-white/30 mb-3">Find me on</p>
+              <div className="flex gap-3">
+                {[
+                  { Icon: FaGithub,   href: OWNER.github,   label: "GitHub" },
+                  { Icon: FaLinkedin, href: OWNER.linkedin, label: "LinkedIn" },
+                ].map(({ Icon, href, label }) => (
+                  <motion.a
+                    key={label} href={href} target="_blank" rel="noopener noreferrer" aria-label={label}
+                    className="w-10 h-10 rounded-xl border border-white/10 bg-white/5 flex items-center justify-center text-white/60 hover:text-white hover:border-violet-500/40 hover:bg-violet-500/10 transition-all"
+                    whileHover={{ scale: 1.1, y: -2 }}
+                  >
+                    <Icon size={16} />
+                  </motion.a>
+                ))}
+              </div>
             </div>
           </motion.div>
 
-          {/* ── Contact Form ──────────────────────────────────────────────── */}
+          {/* Form */}
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
+            className="lg:col-span-3"
+            initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }} transition={{ duration: 0.55, delay: 0.1 }}
           >
-            <form
-              onSubmit={handleSubmit}
-              noValidate
-              className="bg-card/60 backdrop-blur-md rounded-3xl p-8 border border-border shadow-xl space-y-6"
-            >
+            <form onSubmit={handleSubmit} className="glass-card rounded-2xl p-6 space-y-4">
+              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-violet-500/50 to-transparent rounded-t-2xl" />
 
-              {/* Success alert */}
-              {submitStatus === "success" && (
-                <motion.div
-                  className="p-4 bg-green-500/10 dark:bg-green-900/40 border border-green-500/50 dark:border-green-600 text-green-700 dark:text-green-300 rounded-2xl flex items-center gap-3"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                >
-                  <span className="text-xl">✓</span>
-                  <span>Message sent! I'll get back to you soon.</span>
-                </motion.div>
+              {sent && (
+                <div className="p-3 rounded-xl bg-green-500/10 border border-green-500/30 text-green-400 text-sm flex items-center gap-2">
+                  <span className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center text-white text-[10px]">✓</span>
+                  Email client opened — message ready to send!
+                </div>
               )}
 
-              {/* Error alert */}
-              {submitStatus === "error" && (
-                <motion.div
-                  className="p-4 bg-red-500/10 dark:bg-red-900/40 border border-red-500/50 dark:border-red-600 text-red-700 dark:text-red-300 rounded-2xl flex items-center gap-3"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                >
-                  <span className="text-xl">✗</span>
-                  <span>{errorMsg}</span>
-                </motion.div>
-              )}
-
-              {/* Name */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[11px] font-semibold text-white/50 mb-1.5 uppercase tracking-wider">Name</label>
+                  <input className={inputCls} placeholder="Your name" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-white/50 mb-1.5 uppercase tracking-wider">Email</label>
+                  <input type="email" className={inputCls} placeholder="you@example.com" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} />
+                </div>
+              </div>
               <div>
-                <label htmlFor="name" className="block text-foreground font-medium mb-2">
-                  Name
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder="Your name"
-                  autoComplete="name"
-                  className={inputClasses("name")}
-                />
-                {errors.name && (
-                  <p className="mt-1.5 text-red-500 dark:text-red-400 text-sm flex items-center gap-1">
-                    <span>⚠</span> {errors.name}
-                  </p>
-                )}
+                <label className="block text-[11px] font-semibold text-white/50 mb-1.5 uppercase tracking-wider">Message</label>
+                <textarea className={`${inputCls} resize-none`} rows={5} placeholder="Tell me about your project..." value={form.message} onChange={e => setForm(p => ({ ...p, message: e.target.value }))} />
               </div>
-
-              {/* Email */}
-              <div>
-                <label htmlFor="email" className="block text-foreground font-medium mb-2">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="your.email@example.com"
-                  autoComplete="email"
-                  className={inputClasses("email")}
-                />
-                {errors.email && (
-                  <p className="mt-1.5 text-red-500 dark:text-red-400 text-sm flex items-center gap-1">
-                    <span>⚠</span> {errors.email}
-                  </p>
-                )}
-              </div>
-
-              {/* Message */}
-              <div>
-                <label htmlFor="message" className="block text-foreground font-medium mb-2">
-                  Message
-                </label>
-                <textarea
-                  id="message"
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  rows={6}
-                  placeholder="Tell me about your project..."
-                  className={`${inputClasses("message")} resize-none`}
-                />
-                {errors.message && (
-                  <p className="mt-1.5 text-red-500 dark:text-red-400 text-sm flex items-center gap-1">
-                    <span>⚠</span> {errors.message}
-                  </p>
-                )}
-              </div>
-
-               {/* Attachment */}
-               <div>
-                <label htmlFor="attachment" className="block text-foreground font-medium mb-2">
-                  Attach a file (optional - PDF, DOCX, PNG, JPG up to 5MB)
-                </label>
-                <input
-                  type="file"
-                  id="attachment"
-                  name="attachment"
-                  accept=".pdf,.docx,.png,.jpg,.jpeg"
-                  onChange={handleChange}
-                  className={`${inputClasses("attachment")} file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100 dark:file:bg-purple-900/30 dark:file:text-purple-300 transition-colors cursor-pointer`}
-                />
-                {errors.attachment && (
-                  <p className="mt-1.5 text-red-500 dark:text-red-400 text-sm flex items-center gap-1">
-                    <span>⚠</span> {errors.attachment}
-                  </p>
-                )}
-              </div>
-
-              {/* Submit */}
               <motion.button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-2xl flex items-center justify-center gap-2 shadow-lg hover:shadow-purple-500/30 transition-shadow duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
-                whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
-                whileTap={{ scale: isSubmitting ? 1 : 0.97 }}
+                type="submit" disabled={sending}
+                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-gradient-to-r from-violet-600 to-purple-700 text-white font-semibold text-sm shadow-lg shadow-violet-500/25 disabled:opacity-60"
+                whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}
               >
-                {isSubmitting ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Sending…
-                  </>
-                ) : (
-                  <>
-                    <Send className="w-5 h-5" />
-                    Send Message
-                  </>
-                )}
+                {sending ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><Send size={15} /> Send Message</>}
               </motion.button>
-
             </form>
           </motion.div>
         </div>
-
       </div>
-    </section>
+    </SectionWrapper>
   );
 }
