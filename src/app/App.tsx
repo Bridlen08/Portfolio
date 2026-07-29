@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { AnimatePresence } from "framer-motion";import { LoadingScreen } from "./components/LoadingScreen";
+import { AnimatePresence } from "framer-motion";
+import { LoadingScreen } from "./components/LoadingScreen";
 import { VantaBackground } from "./components/VantaBackground";
 import { Navbar } from "./components/Navbar";
 import { Hero } from "./components/Hero";
@@ -18,9 +19,12 @@ import { Resume } from "./components/Resume";
 import { ScrollProgress } from "./components/ScrollProgress";
 import { CursorTracker } from "./components/CursorTracker";
 import { CursorLight } from "./components/CursorLight";
+import { useTheme } from "./ui/ThemeProvider";
 
 export default function App() {
   const [loading, setLoading] = useState(true);
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
 
   return (
     <>
@@ -29,19 +33,16 @@ export default function App() {
       </AnimatePresence>
 
       {!loading && (
-        <div className="relative min-h-screen cursor-none">
-          {/* Full-screen Vanta NET background */}
+        <div
+          className="relative min-h-screen cursor-none"
+          style={{ color: isDark ? "#ffffff" : "#1a1040" }}
+        >
           <VantaBackground />
-
-          {/* Global UI effects */}
           <CursorLight />
           <CursorTracker />
           <ScrollProgress />
-
-          {/* Sticky nav — dark-only, no theme toggle */}
           <Navbar />
 
-          {/* All sections stack above the background */}
           <main className="relative z-10">
             <Hero />
             <About />

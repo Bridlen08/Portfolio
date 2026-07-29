@@ -1,76 +1,142 @@
-/* ── Light mode ────────────────────────────────────────────────────────────── */
-:root {
+/* ═══════════════════════════════════════════════════════
+   BASE — light mode defaults (no .dark class)
+   ═══════════════════════════════════════════════════════ */
+
+html {
   color-scheme: light dark;
 }
 
-html:not(.dark) body {
+/* Light body */
+body {
   background-color: #f0f0fa;
   color: #1a1040;
+  transition: background-color 0.35s ease, color 0.25s ease;
 }
 
-/* Light mode: override all the hardcoded white text across components */
-html:not(.dark) .text-white         { color: #1a1040 !important; }
-html:not(.dark) [class*="text-white\/"]  { color: #4b4070 !important; }
+/* ═══════════════════════════════════════════════════════
+   DARK MODE
+   ═══════════════════════════════════════════════════════ */
 
-/* Navigation */
-html:not(.dark) nav { background: rgba(240,240,250,0.9) !important; }
-
-/* Glass cards */
-html:not(.dark) .glass-card {
-  background: rgba(255,255,255,0.80) !important;
-  border-color: rgba(109,40,217,0.15) !important;
-}
-
-/* Borders */
-html:not(.dark) [class*="border-white"] { border-color: rgba(109,40,217,0.15) !important; }
-
-/* Backgrounds that use white/opacity */
-html:not(.dark) [class*="bg-white\/"]   { background-color: rgba(255,255,255,0.9) !important; }
-html:not(.dark) [class*="bg-black\/"]   { background-color: rgba(240,240,250,0.85) !important; }
-
-/* Input fields */
-html:not(.dark) input,
-html:not(.dark) textarea {
-  background-color: rgba(255,255,255,0.9) !important;
-  color: #1a1040 !important;
-  border-color: rgba(109,40,217,0.2) !important;
-}
-html:not(.dark) input::placeholder,
-html:not(.dark) textarea::placeholder { color: #9ca3af !important; }
-
-/* Footer & section overlays */
-html:not(.dark) footer { background: rgba(240,240,250,0.95) !important; border-color: rgba(109,40,217,0.12) !important; }
-
-/* Hero overlay */
-html:not(.dark) .hero-overlay { background: rgba(240,240,250,0.5) !important; }
-
-/* ── Dark mode ─────────────────────────────────────────────────────────────── */
 .dark body {
   background-color: #0d0d1a;
   color: #ffffff;
 }
 
-/* ── Glass card — dark ───────────────────────────────────────────────────── */
-.dark .glass-card {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-}
+/* ═══════════════════════════════════════════════════════
+   GLASS CARD
+   ═══════════════════════════════════════════════════════ */
 
 .glass-card {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+  /* Light */
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(109, 40, 217, 0.14);
 }
 
-/* ── Scrollbar ─────────────────────────────────────────────────────────────── */
+.dark .glass-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ═══════════════════════════════════════════════════════
+   LIGHT MODE — GLOBAL TEXT OVERRIDES
+   All components use text-white hardcoded.
+   In light mode, force them to dark violet/gray.
+   ═══════════════════════════════════════════════════════ */
+
+html:not(.dark) {
+  /* Any element that Tailwind gives text-white gets overridden */
+  --tw-text-opacity: 1;
+}
+
+/* Target all colour-producing text utilities in light mode */
+html:not(.dark) .text-white {
+  color: #1a1040 !important;
+}
+
+/* Tailwind generates fractional opacity whites as separate classes.
+   We target them via attribute selector which matches any class containing
+   text-white with a slash (fractional opacity variants). */
+html:not(.dark) [class~="text-white\/90"],
+html:not(.dark) [class~="text-white\/80"],
+html:not(.dark) [class~="text-white\/75"],
+html:not(.dark) [class~="text-white\/70"] {
+  color: #2d1f5e !important;
+}
+html:not(.dark) [class~="text-white\/65"],
+html:not(.dark) [class~="text-white\/60"],
+html:not(.dark) [class~="text-white\/55"],
+html:not(.dark) [class~="text-white\/50"] {
+  color: #5b4e82 !important;
+}
+html:not(.dark) [class~="text-white\/40"],
+html:not(.dark) [class~="text-white\/30"],
+html:not(.dark) [class~="text-white\/25"] {
+  color: #9087b0 !important;
+}
+
+/* Section heading gradient stays vibrant in light */
+html:not(.dark) .t-gradient {
+  background: linear-gradient(135deg, #7c3aed, #ec4899);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Borders */
+html:not(.dark) [class*="border-white\/"] {
+  border-color: rgba(109, 40, 217, 0.18) !important;
+}
+
+/* Subtle card backgrounds */
+html:not(.dark) [class*="bg-white\/"] {
+  background-color: rgba(255, 255, 255, 0.88) !important;
+}
+
+html:not(.dark) [class*="bg-black\/"] {
+  background-color: rgba(240, 236, 255, 0.92) !important;
+}
+
+/* Navbar scrolled state */
+html:not(.dark) nav[class*="bg-black"] {
+  background: rgba(240, 236, 255, 0.92) !important;
+  border-bottom-color: rgba(109, 40, 217, 0.15) !important;
+}
+
+/* Input fields */
+html:not(.dark) input,
+html:not(.dark) textarea {
+  color: #1a1040 !important;
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(109, 40, 217, 0.2) !important;
+}
+html:not(.dark) input::placeholder,
+html:not(.dark) textarea::placeholder {
+  color: #9087b0 !important;
+}
+
+/* Footer */
+html:not(.dark) footer {
+  background-color: rgba(240, 236, 255, 0.95) !important;
+  border-top-color: rgba(109, 40, 217, 0.12) !important;
+}
+
+/* ═══════════════════════════════════════════════════════
+   SCROLLBAR
+   ═══════════════════════════════════════════════════════ */
+
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(124,58,237,.5); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(124,58,237,.8); }
-::selection { background: rgba(124,58,237,.3); color: #fff; }
+::-webkit-scrollbar-thumb { background: rgba(124, 58, 237, 0.5); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(124, 58, 237, 0.8); }
 
-/* ── Transitions ─────────────────────────────────────────────────────────── */
+::selection { background: rgba(124, 58, 237, 0.3); color: #fff; }
+
+/* ═══════════════════════════════════════════════════════
+   TRANSITIONS
+   ═══════════════════════════════════════════════════════ */
+
 *, *::before, *::after {
   transition: background-color 0.3s ease, border-color 0.3s ease, color 0.2s ease;
 }
